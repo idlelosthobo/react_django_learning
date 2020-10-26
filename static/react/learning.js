@@ -2,8 +2,8 @@ class WelcomeBack extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            name: 'J',
-            appVersion: '1'
+            name: 'Jay',
+            appVersion: '3'
         }
     }
 
