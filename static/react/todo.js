@@ -2,9 +2,9 @@ function Todo({ todo, index, completeTodo, removeTodo }) {
   return (
     <div
       className="todo"
-      style={{ textDecoration: todo.isCompleted ? "line-through" : "" }}
+      style={{ textDecoration: todo.completed ? "line-through" : "" }}
     >
-      {todo.text}
+      {todo.title}
       <div>
         <button onClick={() => completeTodo(index)}>Complete</button>
         <button onClick={() => removeTodo(index)}>x</button>
@@ -35,21 +35,39 @@ function TodoForm({ addTodo }) {
   );
 }
 
+const useFetch = url => {
+  const [data, setData] = React.useState(null);
+
+  async function fetchData() {
+    const response = await fetch(url);
+    const json = await response.json();
+    setData(json);
+  }
+
+  React.useEffect(() => {fetchData()},[url]);
+
+  console.log(data);
+  return data;
+};
+
 function App() {
-  const [todos, setTodos] = React.useState([
-    {
-      text: "Learn about React",
-      isCompleted: false
-    },
-    {
-      text: "Meet friend for lunch",
-      isCompleted: false
-    },
-    {
-      text: "Build really cool todo app",
-      isCompleted: false
+
+  const data = useFetch("http://127.0.0.1:8000/api/todos/");
+
+  const [todos, setTodos] = React.useState(null)
+
+  React.useEffect(() => {
+    if (data) {
+      const formattedUsers = data.map((obj, i) => {
+        return {
+          id: obj.id,
+          title: obj.title,
+          description: obj.description,
+        };
+      });
+      setTodos(formattedUsers);
     }
-  ]);
+  }, [data]);
 
   const addTodo = text => {
     const newTodos = [...todos, { text }];
@@ -68,18 +86,23 @@ function App() {
     setTodos(newTodos);
   };
 
+
   return (
     <div className="app">
       <div className="todo-list">
-        {todos.map((todo, index) => (
-          <Todo
-            key={index}
-            index={index}
-            todo={todo}
-            completeTodo={completeTodo}
-            removeTodo={removeTodo}
-          />
-        ))}
+        { !todos ? (
+          <p>Loading...</p>
+        ) : (
+          todos.map((todo, index) => (
+            <Todo
+              key={index}
+              index={index}
+              todo={todo}
+              completeTodo={completeTodo}
+              removeTodo={removeTodo}
+            />
+          ))
+        )}
         <TodoForm addTodo={addTodo} />
       </div>
     </div>
